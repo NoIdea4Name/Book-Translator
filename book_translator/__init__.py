@@ -1,0 +1,3 @@
+"""Book Translator desktop application."""
+
+__version__ = "1.29.0"
