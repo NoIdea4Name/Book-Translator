@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Send pages · Book Translator</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#17283e;background:#f1f5fa}*{box-sizing:border-box}body{margin:0}main{max-width:640px;margin:auto;padding:28px 20px 120px}small{color:#526782}h1{font-size:30px;letter-spacing:-1px;margin:12px 0 8px}p{line-height:1.5;color:#526782}button,.pick{font:inherit;border:0;border-radius:12px;padding:15px 18px;cursor:pointer;font-weight:600}button:disabled{opacity:.5;cursor:default}.actions{display:flex;gap:10px;margin:24px 0}.pick{display:block;background:white;flex:1;text-align:center;border:1px solid #cfdae7}.pick:first-child{background:#e2edff;color:#2458a4}input{display:none}#photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.photo{position:relative;background:white;border-radius:12px;overflow:hidden;border:1px solid #d9e2ed}.photo img{width:100%;height:190px;object-fit:contain;display:block;background:#e8edf4}.photo span{display:block;padding:10px;font-size:14px}.photo button{position:absolute;right:6px;top:6px;border-radius:50%;width:34px;height:34px;padding:0;background:#fff;box-shadow:0 2px 8px #0002}footer{position:fixed;bottom:0;left:0;right:0;background:#f1f5faf5;border-top:1px solid #d6dfeb;padding:14px 20px;padding-bottom:max(14px,env(safe-area-inset-bottom))}#send{display:block;width:100%;max-width:600px;margin:auto;background:#2863ce;color:white}#status{min-height:24px;overflow-wrap:anywhere}.empty{padding:42px 20px;text-align:center;border:2px dashed #cbd7e5;border-radius:14px}body.busy .pick{pointer-events:none;opacity:.5}
+</style></head><body><main><small>BOOK TRANSLATOR / PHONE CAPTURE</small><h1>Bring pages to your book.</h1><p>Take photos or choose images, then send them together to your computer.</p>
+<div class="actions"><label class="pick">Take photo<input id="camera" type="file" accept="image/*" capture="environment"></label><label class="pick">Choose images<input id="gallery" type="file" accept="image/*" multiple></label></div>
+<p id="status" role="status" aria-live="polite">Connected to your receiving session.</p><div id="empty" class="empty">Your photos will appear here.</div><div id="photos"></div><p><small>Keep the receiving window open on your computer. Both devices must be on the same Wi-Fi.</small></p></main><footer><button id="send" disabled>Send all images</button></footer>
+<script>
+const photos = [], status = document.querySelector('#status'), send = document.querySelector('#send');
+let busy = false, batch = null;
+function render() {
+  const container = document.querySelector('#photos'); container.replaceChildren();
+  document.querySelector('#empty').hidden = photos.length > 0;
+  photos.forEach((photo, index) => {
+    const card = document.createElement('div'); card.className = 'photo';
+    const img = document.createElement('img'); img.src = photo.url; img.alt = `Page ${index + 1}`;
+    const label = document.createElement('span'); label.textContent = `Page ${index + 1}`;
+    const remove = document.createElement('button'); remove.textContent = '×'; remove.setAttribute('aria-label', `Remove page ${index + 1}`); remove.disabled = busy || !!batch;
+    remove.onclick = () => { URL.revokeObjectURL(photo.url); photos.splice(index, 1); render(); };
+    card.append(img, label, remove); container.append(card);
+  });
+  send.disabled = busy || !photos.length;
+  send.textContent = busy ? 'Sending…' : `Send all${photos.length ? ` (${photos.length})` : ' images'}`;
+  document.body.classList.toggle('busy', busy || !!batch);
+}
+async function prepare(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image(); img.src = url; await img.decode();
+    const ratio = Math.min(1, 3200 / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement('canvas'); canvas.width = Math.round(img.naturalWidth * ratio); canvas.height = Math.round(img.naturalHeight * ratio);
+    const ctx = canvas.getContext('2d'); ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', .94));
+    if (!blob) throw new Error('Cannot read this photo.');
+    return {blob, url: URL.createObjectURL(blob), id: null, key: `${Date.now()}${Math.random().toString(36).slice(2)}`};
+  } finally { URL.revokeObjectURL(url); }
+}
+async function choose(event) {
+  if (busy || batch) return;
+  const files = Array.from(event.target.files); event.target.value = '';
+  if (photos.length + files.length > 100) { status.textContent = 'Send up to 100 photos at a time.'; return; }
+  busy = true; render(); let failed = 0;
+  for (const file of files) { try { photos.push(await prepare(file)); } catch { failed++; } }
+  busy = false; render(); status.textContent = failed ? `${failed} photo(s) could not be read. Try JPG or PNG.` : `${photos.length} photo(s) ready.`;
+}
+document.querySelector('#camera').onchange = choose; document.querySelector('#gallery').onchange = choose;
+async function post(route, body, type, key) {
+  const response = await fetch(new URL(route, location.href), {method:'POST', headers:{'Content-Type':type, ...(key ? {'X-Photo-Id':key} : {})}, body});
+  const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Upload failed.'); return result;
+}
+send.onclick = async () => {
+  if (busy || !photos.length) return;
+  busy = true; batch ||= `${Date.now()}-${Math.random().toString(36).slice(2)}`; render();
+  try {
+    for (let i=0; i<photos.length; i++) {
+      status.textContent = `Sending photo ${i+1} of ${photos.length}…`;
+      if (!photos[i].id) photos[i].id = (await post('upload', photos[i].blob, 'image/jpeg', photos[i].key)).id;
+      // Commit as each photo arrives, so the desktop can free space during large sends.
+      await post('commit', JSON.stringify({batch:`${batch}-${i}`, ids:[photos[i].id]}), 'application/json');
+    }
+    const received = photos.length;
+    photos.forEach(photo => URL.revokeObjectURL(photo.url)); photos.length = 0; batch = null;
+    status.textContent = `${received} photo(s) received! Choose Save or Add on your computer.`;
+  } catch (error) { status.textContent = `${error.message} Keep this page open and press Send again to retry.`; }
+  finally { busy = false; render(); }
+};
+window.addEventListener('beforeunload', event => { if (photos.length) { event.preventDefault(); event.returnValue = ''; } });
+</script></body></html>
