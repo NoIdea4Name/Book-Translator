@@ -1,6 +1,6 @@
 # Book Translator 1.29.0
 
-A Python desktop app for extracting and translating books powered by AI.
+A Python desktop app for extracting and translating books powered by AI. Made entirely with GPT 6 Astra.
 Editable text is on the left, the original page is on the right, and a scrollable
 thumbnail strip lets you jump between pages.
 
