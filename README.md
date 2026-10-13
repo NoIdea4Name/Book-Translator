@@ -79,12 +79,16 @@ Adjust the threshold above the preview or hide boxes with **Flags**. Click a
 review item below the editor to focus its location; hover for its explanation.
 An amber **!** icon on the thumbnail marks low-confidence flags. Hover to see their count.
 Right-click → **Flag page** adds a separate flag icon on a red background for your own reminder;
+
 **Remove flag** removes just that manual flag. Both icons can appear together.
 Manual flags are saved with the project and follow renamed or reordered pages. Hover it for the page-level confidence estimates.
 It follows the review threshold and remains visible even when preview boxes are hidden.
-It means review is needed, not that the API request failed. Flags never change
-the thumbnail's page name. Right-click a flagged thumbnail → **Mark as checked**
-to acknowledge its review flags and clear both badge icons, without adding a Checked badge. **Mark as unchecked**
+It means review is needed, not that the API request failed. 
+
+Right-click a flagged thumbnail → **Mark as checked**
+to acknowledge its review flags and clear both badge icons, without adding a Checked badge. 
+
+**Mark as unchecked**
 restores the flags. This status is saved with your project and follows the page
 when renamed or reordered. Changing its text or receiving a new AI result
 requires review again. Checking a page does not change the model's confidence scores.
