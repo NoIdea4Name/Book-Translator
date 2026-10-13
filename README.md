@@ -17,7 +17,7 @@ thumbnail strip lets you jump between pages.
 9. Project saving: Save work space as btproject for reopening later.
 10. Multi languages support: Translate or extract every language that the AI suport (type your language if the drop down dont have). The GUI also support multi language translation of vietnamese and english are included. More can be added.
 
-![Book Translator](page review.png)
+![Book Translator](page_review.png)
 
 The image show example of Page Review feauture. The blurry bottom passages was highlighted by AI.
 ## Run on Windows
