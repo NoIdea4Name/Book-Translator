@@ -55,6 +55,66 @@ The script installs build dependencies and creates
 Use `--onefile` for a single `dist/BookTranslator.exe`, or `--console` to debug.
 See [BUILDING.md](BUILDING.md) for all options and Windows verification steps.
 
+## Use the app
+
+1. **Open files**: add PDFs, page images, or a mixture of both to the current workspace. PNG, JPG, WEBP, BMP,
+   TIFF, multi-page TIFF, and password-protected PDFs are supported.
+2. **Extract text**: choose **PDF text · offline** for selectable text, or
+   **AI OCR** for scans and images.
+3. Edit the **Source text**, choose a language, and click **Translate text**.
+   Translation uses the current source text, including your edits.
+4. Navigate with **< / >**, the page label, or the thumbnails. Each page keeps
+   its own source and translation.
+5. **Save project** to continue later. **File → Export text** exports source,
+   translations, or both as a UTF-8 text file. Uncheck **Show page headers** in the
+   export options to omit page headings, then click **Continue** to choose a file.
+
+Drag the preview to pan. Scroll or use +/- to zoom. Double-click or click **Fit**
+to fit the page. The page is horizontally centered when opened, fitted, or when
+the preview panel is resized. Drag the dividers to resize the panels.
+
+The selected model returns confidence estimates for extraction and translation. Amber boxes
+mark uncertain extraction; purple dashed boxes mark uncertain translation.
+Adjust the threshold above the preview or hide boxes with **Flags**. Click a
+review item below the editor to focus its location; hover for its explanation.
+An amber **!** icon on the thumbnail marks low-confidence flags. Hover to see their count.
+Right-click → **Flag page** adds a separate flag icon on a red background for your own reminder;
+**Remove flag** removes just that manual flag. Both icons can appear together.
+Manual flags are saved with the project and follow renamed or reordered pages. Hover it for the page-level confidence estimates.
+It follows the review threshold and remains visible even when preview boxes are hidden.
+It means review is needed, not that the API request failed. Flags never change
+the thumbnail's page name. Right-click a flagged thumbnail → **Mark as checked**
+to acknowledge its review flags and clear both badge icons, without adding a Checked badge. **Mark as unchecked**
+restores the flags. This status is saved with your project and follows the page
+when renamed or reordered. Changing its text or receiving a new AI result
+requires review again. Checking a page does not change the model's confidence scores.
+These are model estimates, not measured accuracy. Unlocated passages remain in
+the review list without a guessed rectangle. Editing text keeps the review items and original-image highlights. Scores for edited
+text are marked outdated. Click **×** beside a passage to dismiss only that item and
+its highlight; the other passages stay available. Dismissals are saved in the project.
+A new AI result resets dismissals for that task. Click the arrow beside the confidence totals to collapse or expand the passage list.
+The totals remain visible in the header. Passage links and dismiss buttons are borderless. Collapsing does not dismiss any items. Offline PDF extraction has no AI confidence score.
+
+## Shortcuts
+
+| Action | Shortcut |
+| --- | --- |
+| Add PDF/images | Ctrl+O |
+| New workspace | Ctrl+N |
+| Open project | Ctrl+Shift+O |
+| Save / Save as | Ctrl+S / Ctrl+Shift+S |
+| Export text | Ctrl+E |
+| Previous / next page | Alt+Left / Alt+Right |
+| Go to page | Ctrl+G |
+| Extract | Ctrl+Shift+E |
+| Translate | Ctrl+Enter |
+| Floating Gemini chat | Ctrl+J |
+| Send chat message | Ctrl+Enter (inside chat) |
+| Select image region | Shift-drag in preview |
+| Clear/cancel image region | Esc (inside preview) |
+
+You can also open a document at startup: `py -3 main.py "book.pdf"`.
+
 ## Capture pages from a phone
 
 1. Open **File → Receive from phone** (Ctrl+Shift+I).
@@ -331,46 +391,6 @@ discards edits. Preferences are app-wide, not embedded in individual projects. Y
 keys are saved separately in the OS credential store. Instructions must remain compatible with the required
 text/confidence response format.
 
-## Use the app
-
-1. **Open files**: add PDFs, page images, or a mixture of both to the current workspace. PNG, JPG, WEBP, BMP,
-   TIFF, multi-page TIFF, and password-protected PDFs are supported.
-2. **Extract text**: choose **PDF text · offline** for selectable text, or
-   **AI OCR** for scans and images.
-3. Edit the **Source text**, choose a language, and click **Translate text**.
-   Translation uses the current source text, including your edits.
-4. Navigate with **< / >**, the page label, or the thumbnails. Each page keeps
-   its own source and translation.
-5. **Save project** to continue later. **File → Export text** exports source,
-   translations, or both as a UTF-8 text file. Uncheck **Show page headers** in the
-   export options to omit page headings, then click **Continue** to choose a file.
-
-Drag the preview to pan. Scroll or use +/- to zoom. Double-click or click **Fit**
-to fit the page. The page is horizontally centered when opened, fitted, or when
-the preview panel is resized. Drag the dividers to resize the panels.
-
-The selected model returns confidence estimates for extraction and translation. Amber boxes
-mark uncertain extraction; purple dashed boxes mark uncertain translation.
-Adjust the threshold above the preview or hide boxes with **Flags**. Click a
-review item below the editor to focus its location; hover for its explanation.
-An amber **!** icon on the thumbnail marks low-confidence flags. Hover to see their count.
-Right-click → **Flag page** adds a separate flag icon on a red background for your own reminder;
-**Remove flag** removes just that manual flag. Both icons can appear together.
-Manual flags are saved with the project and follow renamed or reordered pages. Hover it for the page-level confidence estimates.
-It follows the review threshold and remains visible even when preview boxes are hidden.
-It means review is needed, not that the API request failed. Flags never change
-the thumbnail's page name. Right-click a flagged thumbnail → **Mark as checked**
-to acknowledge its review flags and clear both badge icons, without adding a Checked badge. **Mark as unchecked**
-restores the flags. This status is saved with your project and follows the page
-when renamed or reordered. Changing its text or receiving a new AI result
-requires review again. Checking a page does not change the model's confidence scores.
-These are model estimates, not measured accuracy. Unlocated passages remain in
-the review list without a guessed rectangle. Editing text keeps the review items and original-image highlights. Scores for edited
-text are marked outdated. Click **×** beside a passage to dismiss only that item and
-its highlight; the other passages stay available. Dismissals are saved in the project.
-A new AI result resets dismissals for that task. Click the arrow beside the confidence totals to collapse or expand the passage list.
-The totals remain visible in the header. Passage links and dismiss buttons are borderless. Collapsing does not dismiss any items. Offline PDF extraction has no AI confidence score.
-
 ## Saving and requests
 
 Projects store text, assessments, settings, and paths to the original files.
@@ -399,26 +419,6 @@ See [CODE_GUIDE.md](CODE_GUIDE.md) for the file map and request flow.
 
 This version separates the previous large UI module into focused files, replaces
 request dictionaries with a named `PageJob`, and uses a static SVG app icon.
-
-## Shortcuts
-
-| Action | Shortcut |
-| --- | --- |
-| Add PDF/images | Ctrl+O |
-| New workspace | Ctrl+N |
-| Open project | Ctrl+Shift+O |
-| Save / Save as | Ctrl+S / Ctrl+Shift+S |
-| Export text | Ctrl+E |
-| Previous / next page | Alt+Left / Alt+Right |
-| Go to page | Ctrl+G |
-| Extract | Ctrl+Shift+E |
-| Translate | Ctrl+Enter |
-| Floating Gemini chat | Ctrl+J |
-| Send chat message | Ctrl+Enter (inside chat) |
-| Select image region | Shift-drag in preview |
-| Clear/cancel image region | Esc (inside preview) |
-
-You can also open a document at startup: `py -3 main.py "book.pdf"`.
 
 ## Check changes
 
