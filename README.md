@@ -7,17 +7,17 @@ within the available strip width, including when its scrollbar appears.
 ![Book Translator](preview.png)
 
 ## Feautures
-1. Batch processing: Extract or translate multiple book pages with context aware, and automatically summarize to provide context for next pages. Progress window show token usage (None for PDF mode), status, and detailed infomations.
+1. Batch processing: Extract or translate multiple book pages with context aware, and automatically summarize to provide context for next pages. Progress window show token usage (None for PDF and Local OCR mode), status, and detailed infomations.
 2. Send from phone: Capture images of book pages and send them to the app directly with full quality, images are editable and can be saved. PDF and images import exist for the local file of computer.
 3. Page review: Automatically flags the low confidence page and passage, individual flagged passage are clickable to focus on the highlighted box on the image and text. Flagged pages and passage can be navigated with keybind.
 3. Page review: Automatically flags the low confidence page and passage, individual flagged passage are clickable to focus on the highlighted box on the image and text, hover for detail. Flagged pages and passage can be navigated with keybind.
 4. AI chat: AI chat window directly inside the app, select text, or image region to ask questions and apply suggested editing in a single button.
-5. API rotation: Rotate through multiple API and providers for almost unlimited usage. Available provider include Google, Nvidia Nim, and Open AI. Google gemini are recommended since it is fast and have up to 1000 request per day (Multiple model can be used in one API, rotate between models like 3.5 flash lite, and 3.1 flash lite. ). Nvidia are free but slow.
+5. API rotation: Rotate through multiple API and providers for almost unlimited usage. Available provider include Google, Nvidia Nim, and Open AI. Google Gemini are recommended since it is fast and have up to 1000 request per day (Multiple model can be used in one API, rotate between models like 3.5 flash lite, and 3.1 flash lite. ). Nvidia are free but slow.
 6. Instruction & Output: Customize AI instruction for specific output. For example I'm using this app to make audio book so i used "Translate for a audio book, change writing to fit, describe figures if present, and remove unnecessary text that wont be used in a audio book". As you can see the possibility are endless, you can do whatever you want!
 7. Consistent Output: AI will be fed pages context, images, and temperature for consistent and unchanged output style across pages. The AI can also edit previous page ending to make the text consistent for purpose like what I'm doing. For example if the first page image text is "This is..." and second page is "a continuous sentence", the AI will correct the previous page ending. Together the text will be "This is a continuous sentence" instead of "This is... a continuous sentence"
 8. Page history: History of pages are kept for recovery
 9. Project saving: Save work space as btproject for reopening later.
-10. Multi languages support: Translate or extract every language that the AI suport (type your language if the drop down dont have). The GUI also support multi language translation of vietnamese and english are included. More can be added.
+10. Multi languages support: Translate or extract every language that the AI support (type your language if the drop down don't have). The GUI also support multi language translation of Vietnamese and English are included. More can be added.
 
 ![Book Translator](page_review.png)
 
