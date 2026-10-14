@@ -4,6 +4,8 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
+from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QMessageBox
 from book_translator.core import BookDocument
 from book_translator.confidence import Assessment
@@ -40,6 +42,7 @@ class FindReplaceTests(unittest.TestCase):
         report = self.book.pages[0].extraction_assessment
         self.dialog.find.setText("cat")
         self.dialog.whole_word.setChecked(True)
+        QTest.keyClick(self.dialog.find, Qt.Key.Key_Return)
         self.dialog.replacement.setText(r"cat\1")
         with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
             self.dialog.replace_all()
@@ -54,6 +57,7 @@ class FindReplaceTests(unittest.TestCase):
 
     def test_single_match_navigation_and_unicode_highlight(self):
         self.dialog.find.setText("Cat")
+        QTest.keyClick(self.dialog.find, Qt.Key.Key_Return)
         self.assertEqual(self.dialog.preview.textCursor().selectedText(), "Cat")
         self.dialog.replacement.setText("Dog")
         self.dialog.replace_one()
@@ -63,6 +67,7 @@ class FindReplaceTests(unittest.TestCase):
 
     def test_cancel_bulk_and_empty_replacement(self):
         self.dialog.find.setText("cat")
+        QTest.keyClick(self.dialog.find, Qt.Key.Key_Return)
         with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No):
             self.dialog.replace_all()
         self.assertEqual(self.book.pages[1].source, "cat")
@@ -70,3 +75,19 @@ class FindReplaceTests(unittest.TestCase):
         replace_matches(self.book.pages, matches, "")
         self.assertEqual(self.book.pages[1].source, "")
         self.assertEqual(self.book.pages[0].translation, "Cat story")
+
+    def test_typing_and_options_do_not_scan_until_enter(self):
+        with patch('book_translator.find_replace.find_matches', wraps=find_matches) as scan:
+            self.dialog.find.setText('cat')
+            self.dialog.whole_word.setChecked(True)
+            self.dialog.scope.setCurrentIndex(1)
+            scan.assert_not_called()
+            QTest.keyClick(self.dialog.find, Qt.Key.Key_Return)
+            self.assertEqual(scan.call_count, 1)
+            self.assertEqual(len(self.dialog.matches), 3)
+            self.dialog.find.setText('dog')
+            self.assertEqual(scan.call_count, 1)
+            self.assertEqual(self.dialog.matches, [])
+            self.assertFalse(self.dialog.replace_all_button.isEnabled())
+            self.dialog.replace_one()
+            self.assertEqual(self.book.pages[1].source, 'cat')

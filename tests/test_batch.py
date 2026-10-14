@@ -333,3 +333,48 @@ class BatchTests(unittest.TestCase):
         call.assert_not_called()
         self.assertFalse(self.window._busy)
         self.assertEqual(self.window.book.pages[2].translation, "Keep")
+
+    def test_local_ocr_batch_needs_no_api_and_retries_failed_only(self):
+        self.window.api_key = ''
+        self.window.api_profiles = []
+        self.window.method.setCurrentIndex(2)
+        self.select(0, 1)
+        calls = []
+        def extract(image, *args):
+            calls.append(image)
+            if len(calls) == 2:
+                raise RuntimeError('Missing OCR language')
+            return Assessment('Offline text', .75, [])
+        with patch('book_translator.page_render.render_request', return_value=(b'png', 'image/png')), \
+             patch('book_translator.local_ocr.extract_image', side_effect=extract), \
+             patch.object(self.window, '_ensure_key', side_effect=AssertionError('No API expected')):
+            self.window.extract()
+            self.wait_for(lambda: self.window._batch is None)
+            self.assertEqual(self.window.book.pages[0].source, 'Offline text')
+            self.assertEqual(self.window.book.pages[1].source, '')
+            self.assertEqual(self.window._selected_pages(), [1])
+            self.window.method.setCurrentIndex(1)
+            self.window.retry_failed_batch()
+            self.wait_for(lambda: self.window._batch is None)
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(self.window.book.pages[1].source, 'Offline text')
+        self.assertEqual(self.window.token_total, 0)
+        self.assertIsNone(self.window._verified_connection)
+
+    def test_single_local_ocr_preserves_text_on_cancel(self):
+        self.window.api_key = ''
+        self.select(0)
+        self.window.method.setCurrentIndex(2)
+        started = threading.Event()
+        def extract(image, executable, languages, cancel):
+            started.set()
+            cancel.wait(3)
+            return Assessment('Too late', .9, [])
+        with patch('book_translator.page_render.render_request', return_value=(b'png', 'image/png')), \
+             patch('book_translator.local_ocr.extract_image', side_effect=extract):
+            self.window.extract()
+            self.wait_for(started.is_set)
+            self.window.cancel_request()
+            self.app.processEvents()
+            self.window._poll_results()
+        self.assertEqual(self.window.book.pages[0].source, '')

@@ -199,6 +199,38 @@ class ChatTests(unittest.TestCase):
         self.assertFalse(self.panel.attach_region.isEnabled())
 
 
+    def test_switch_models_after_completed_messages_and_failover(self):
+        from book_translator.api_rotation import ApiProfile
+        from book_translator.api_errors import APIError
+        self.window.api_profiles = [ApiProfile('gemini', 'gemini-one', 'key-one'),
+                                    ApiProfile('gemini', 'gemini-two', 'key-two')]
+        self.window.rotation_enabled = True
+        open_chat(self.window)
+        self.panel = self.window.chat_panel
+        calls = []
+        fail_first = [True]
+        def chat(service, *args):
+            calls.append(service.model)
+            if service.model == 'gemini-one' and fail_first[0]:
+                fail_first[0] = False
+                raise APIError('Quota', rotate_now=True)
+            return ChatReply('Answer', None)
+        with patch.object(GeminiService, 'chat', chat):
+            for selected in (0, 0, 1, 0):
+                self.panel.model_selector.setCurrentIndex(selected)
+                self.panel.prompt.setPlainText('Explain')
+                self.panel.send()
+                deadline = time.monotonic() + 3
+                while self.panel.pending and time.monotonic() < deadline:
+                    self.app.processEvents()
+                    self.panel.poll_results()
+                    time.sleep(.005)
+                self.assertFalse(self.panel.pending)
+                self.assertIsNotNone(self.panel.reply, self.panel.status.text())
+        self.assertEqual(calls, ['gemini-one', 'gemini-two', 'gemini-one', 'gemini-two', 'gemini-one'])
+        self.assertIn('gemini-one', self.panel.transcript.toPlainText())
+        self.assertIn('gemini-two', self.panel.transcript.toPlainText())
+
 class ChatServiceTests(unittest.TestCase):
     def test_reply_validation(self):
         for value in [{}, {"answer": "", "replacement": None}, {"answer": "ok", "replacement": False}]:
@@ -232,3 +264,4 @@ class ChatServiceTests(unittest.TestCase):
         parts = requests[0]["contents"][0]["parts"]
         self.assertIn("inlineData", parts[0])
         self.assertEqual(json.loads(parts[1]["text"])["request"], "Explain")
+
