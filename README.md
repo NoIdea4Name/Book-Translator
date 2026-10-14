@@ -23,6 +23,9 @@ A Python desktop app for extracting and translating books pages. Powered by AI, 
 - Find and replace across all pages waits for Enter. Editing the query, scope, case, or whole-word options clears stale results and disables replacement until the next search. Results refresh after a replacement or undo.
 - Select **Local OCR · Tesseract** in the extraction method menu to extract images or scanned PDF pages without an API key. Single-page and batch extraction support cancellation, failure selection and retry. Local OCR does not translate or update the AI summary; Translate and Extract & Translate continue to use AI.
 
+## Beta 2.1.0
+New beta version with rich text editor (formating) and PDF export. The AI will now reconstruct the page with images, format, etc. Docx, and pdf export with look like the output, non-image export like txt will have a description of the figure, editable by clicking the image.
+
 ## Run on Windows
 
 Install Python 3.12 or later, extract this ZIP, and open a terminal in the folder
