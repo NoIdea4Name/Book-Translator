@@ -1,8 +1,5 @@
 # Book Translator 1.30.0
-A Python desktop app for extracting and translating books one page at a time.
-Editable text is on the left, the original page is on the right, and a scrollable
-thumbnail strip lets you jump between pages. Thumbnails are horizontally centered
-within the available strip width, including when its scrollbar appears.
+A Python desktop app for extracting and translating books pages. Powered by AI, local OCR and selectable PDF text extracting still available. Translation only support AI, supported provider include Google and Nvidia Nim as free option, and Open AI. This App is made entirely with GPT 6 Astra. Primary purpose of this is to make audio book from scanned images and PDF (selectable text supported) and export or copy the text for TTS service.
 
 ![Book Translator](preview.png)
 
