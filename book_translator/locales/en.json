@@ -489,6 +489,24 @@
     "Chat model": "Chat model",
     "Enter to send · Shift+Enter for a new line": "Enter to send · Shift+Enter for a new line",
     "Add an API entry in Settings to use chat.": "Add an API entry in Settings to use chat.",
-    "AI": "AI"
+    "AI": "AI",
+    "Press Enter to search all pages": "Press Enter to search all pages",
+    "Local OCR": "Local OCR",
+    "Local OCR · Tesseract": "Local OCR · Tesseract",
+    "Auto-detect Tesseract": "Auto-detect Tesseract",
+    "Tesseract executable": "Tesseract executable",
+    "OCR languages": "OCR languages",
+    "Browse": "Browse",
+    "Install Tesseract": "Install Tesseract",
+    "Running local OCR…": "Running local OCR…",
+    "Local OCR failed": "Local OCR failed",
+    "Tesseract word confidence": "Tesseract word confidence",
+    "Use installed Tesseract language codes, for example eng, vie, jpn, or eng+vie. Local OCR requires Tesseract and its language data. No API key is needed.": "Use installed Tesseract language codes, for example eng, vie, jpn, or eng+vie. Local OCR requires Tesseract and its language data. No API key is needed.",
+    "Tesseract was not found. Install Tesseract and its language data, then set its executable in Settings → Local OCR.": "Tesseract was not found. Install Tesseract and its language data, then set its executable in Settings → Local OCR.",
+    "Local OCR found no text. Check the image and installed OCR languages.": "Local OCR found no text. Check the image and installed OCR languages.",
+    "Use OCR language codes such as eng, vie, jpn, or eng+vie.": "Use OCR language codes such as eng, vie, jpn, or eng+vie.",
+    "Local OCR timed out. Your text was left unchanged.": "Local OCR timed out. Your text was left unchanged.",
+    "Local OCR failed. Check that the requested language data is installed.": "Local OCR failed. Check that the requested language data is installed.",
+    "AI scores are self-estimates; local OCR scores come from Tesseract. Neither measures accuracy. PDF text extraction has no confidence score.": "AI scores are self-estimates; local OCR scores come from Tesseract. Neither measures accuracy. PDF text extraction has no confidence score."
   }
 }

@@ -489,6 +489,24 @@
     "Chat model": "Mô hình trò chuyện",
     "Enter to send · Shift+Enter for a new line": "Enter để gửi · Shift+Enter để xuống dòng",
     "Add an API entry in Settings to use chat.": "Thêm API trong Cài đặt để trò chuyện.",
-    "AI": "AI"
+    "AI": "AI",
+    "Press Enter to search all pages": "Nhấn Enter để tìm trên tất cả các trang",
+    "Local OCR": "OCR ngoại tuyến",
+    "Local OCR · Tesseract": "OCR ngoại tuyến · Tesseract",
+    "Auto-detect Tesseract": "Tự động tìm Tesseract",
+    "Tesseract executable": "Tệp thực thi Tesseract",
+    "OCR languages": "Ngôn ngữ OCR",
+    "Browse": "Duyệt",
+    "Install Tesseract": "Cài đặt Tesseract",
+    "Running local OCR…": "Đang nhận dạng chữ ngoại tuyến…",
+    "Local OCR failed": "OCR ngoại tuyến thất bại",
+    "Tesseract word confidence": "Độ tin cậy nhận dạng từ của Tesseract",
+    "Use installed Tesseract language codes, for example eng, vie, jpn, or eng+vie. Local OCR requires Tesseract and its language data. No API key is needed.": "Dùng mã ngôn ngữ Tesseract đã cài, ví dụ eng, vie, jpn hoặc eng+vie. OCR ngoại tuyến cần Tesseract và dữ liệu ngôn ngữ, không cần khóa API.",
+    "Tesseract was not found. Install Tesseract and its language data, then set its executable in Settings → Local OCR.": "Không tìm thấy Tesseract. Hãy cài Tesseract và dữ liệu ngôn ngữ, rồi chọn tệp thực thi trong Cài đặt → OCR ngoại tuyến.",
+    "Local OCR found no text. Check the image and installed OCR languages.": "OCR ngoại tuyến không tìm thấy văn bản. Hãy kiểm tra ảnh và các ngôn ngữ OCR đã cài.",
+    "Use OCR language codes such as eng, vie, jpn, or eng+vie.": "Dùng mã ngôn ngữ OCR như eng, vie, jpn hoặc eng+vie.",
+    "Local OCR timed out. Your text was left unchanged.": "OCR ngoại tuyến quá thời gian chờ. Văn bản của bạn không bị thay đổi.",
+    "Local OCR failed. Check that the requested language data is installed.": "OCR ngoại tuyến thất bại. Hãy kiểm tra dữ liệu ngôn ngữ đã được cài đặt.",
+    "AI scores are self-estimates; local OCR scores come from Tesseract. Neither measures accuracy. PDF text extraction has no confidence score.": "Điểm AI do mô hình tự đánh giá; điểm OCR ngoại tuyến do Tesseract cung cấp. Cả hai không phải độ chính xác đo lường. Trích xuất văn bản PDF không có điểm tin cậy."
   }
 }
