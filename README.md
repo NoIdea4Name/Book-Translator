@@ -1,18 +1,4 @@
 # Book Translator 1.30.0
-
-## Version 1.30.0
-
-- Ask AI starts each message with the model selected in its dropdown, including after a previous response or automatic failover. Replies show the actual provider/model; automatic rotation remains available if the selected API fails.
-- Find and replace across all pages waits for Enter. Editing the query, scope, case, or whole-word options clears stale results and disables replacement until the next search. Results refresh after a replacement or undo.
-- Select **Local OCR · Tesseract** in the extraction method menu to extract images or scanned PDF pages without an API key. Single-page and batch extraction support cancellation, failure selection and retry. Local OCR does not translate or update the AI summary; Translate and Extract & Translate continue to use AI.
-
-### Local OCR setup
-
-Install [Tesseract](https://tesseract-ocr.github.io/tessdoc/Installation.html) and the language data you need. It is an optional external program, not a Python package or bundled download. On Windows the normal `C:\Program Files\Tesseract-OCR\tesseract.exe` install is detected automatically, as are executables on PATH. Otherwise use **Settings → Local OCR → Browse** to select it.
-
-Set OCR languages to Tesseract codes such as `eng` (English), `vie` (Vietnamese), `jpn` (Japanese), or `eng+vie`. These describe the source image, independently of the translation target. Install each selected language's `.traineddata` in Tesseract's tessdata folder. Preferences persist with other settings. Local OCR runs entirely on your computer, reports zero API tokens, preserves paragraph/line breaks, and supplies word confidence boxes to the existing review tools. Tesseract confidence is an engine score, not measured accuracy. Blank output or engine errors leave existing text unchanged.
-
-
 A Python desktop app for extracting and translating books one page at a time.
 Editable text is on the left, the original page is on the right, and a scrollable
 thumbnail strip lets you jump between pages. Thumbnails are horizontally centered
@@ -20,7 +6,26 @@ within the available strip width, including when its scrollbar appears.
 
 ![Book Translator](preview.png)
 
-The screenshot shows sample text and example confidence data.
+## Feautures
+1. Batch processing: Extract or translate multiple book pages with context aware, and automatically summarize to provide context for next pages. Progress window show token usage (None for PDF mode), status, and detailed infomations.
+2. Send from phone: Capture images of book pages and send them to the app directly with full quality, images are editable and can be saved. PDF and images import exist for the local file of computer.
+3. Page review: Automatically flags the low confidence page and passage, individual flagged passage are clickable to focus on the highlighted box on the image and text. Flagged pages and passage can be navigated with keybind.
+3. Page review: Automatically flags the low confidence page and passage, individual flagged passage are clickable to focus on the highlighted box on the image and text, hover for detail. Flagged pages and passage can be navigated with keybind.
+4. AI chat: AI chat window directly inside the app, select text, or image region to ask questions and apply suggested editing in a single button.
+5. API rotation: Rotate through multiple API and providers for almost unlimited usage. Available provider include Google, Nvidia Nim, and Open AI. Google gemini are recommended since it is fast and have up to 1000 request per day (Multiple model can be used in one API, rotate between models like 3.5 flash lite, and 3.1 flash lite. ). Nvidia are free but slow.
+6. Instruction & Output: Customize AI instruction for specific output. For example I'm using this app to make audio book so i used "Translate for a audio book, change writing to fit, describe figures if present, and remove unnecessary text that wont be used in a audio book". As you can see the possibility are endless, you can do whatever you want!
+7. Consistent Output: AI will be fed pages context, images, and temperature for consistent and unchanged output style across pages. The AI can also edit previous page ending to make the text consistent for purpose like what I'm doing. For example if the first page image text is "This is..." and second page is "a continuous sentence", the AI will correct the previous page ending. Together the text will be "This is a continuous sentence" instead of "This is... a continuous sentence"
+8. Page history: History of pages are kept for recovery
+9. Project saving: Save work space as btproject for reopening later.
+10. Multi languages support: Translate or extract every language that the AI suport (type your language if the drop down dont have). The GUI also support multi language translation of vietnamese and english are included. More can be added.
+
+![Book Translator](page_review.png)
+
+## New in version 1.30.0
+
+- Ask AI starts each message with the model selected in its dropdown, including after a previous response or automatic failover. Replies show the actual provider/model; automatic rotation remains available if the selected API fails.
+- Find and replace across all pages waits for Enter. Editing the query, scope, case, or whole-word options clears stale results and disables replacement until the next search. Results refresh after a replacement or undo.
+- Select **Local OCR · Tesseract** in the extraction method menu to extract images or scanned PDF pages without an API key. Single-page and batch extraction support cancellation, failure selection and retry. Local OCR does not translate or update the AI summary; Translate and Extract & Translate continue to use AI.
 
 ## Run on Windows
 
@@ -56,6 +61,72 @@ The script installs build dependencies and creates
 `dist/BookTranslator/BookTranslator.exe`. Share the entire output folder.
 Use `--onefile` for a single `dist/BookTranslator.exe`, or `--console` to debug.
 See [BUILDING.md](BUILDING.md) for all options and Windows verification steps.
+
+## Use the app
+
+1. **Open files**: add PDFs, page images, or a mixture of both to the current workspace. PNG, JPG, WEBP, BMP,
+   TIFF, multi-page TIFF, and password-protected PDFs are supported.
+2. **Extract text**: choose **PDF text · offline** for selectable text, or
+   **AI OCR** for scans and images.
+3. Edit the **Source text**, choose a language, and click **Translate text**.
+   Translation uses the current source text, including your edits.
+4. Navigate with **< / >**, the page label, or the thumbnails. Each page keeps
+   its own source and translation.
+5. **Save project** to continue later. **File → Export text** exports source,
+   translations, or both as a UTF-8 text file. Uncheck **Show page headers** in the
+   export options to omit page headings, then click **Continue** to choose a file.
+
+Drag the preview to pan. Scroll or use +/- to zoom. Double-click or click **Fit**
+to fit the page. The page is horizontally centered when opened, fitted, or when
+the preview panel is resized. Drag the dividers to resize the panels.
+
+The selected model returns confidence estimates for extraction and translation. Amber boxes
+mark uncertain extraction; purple dashed boxes mark uncertain translation.
+Adjust the threshold above the preview or hide boxes with **Flags**. Click a
+review item below the editor to focus its location; hover for its explanation.
+An amber **!** icon on the thumbnail marks low-confidence flags. Hover to see their count.
+Right-click → **Flag page** adds a separate flag icon on a red background for your own reminder;
+**Remove flag** removes just that manual flag. Both icons can appear together.
+Manual flags are saved with the project and follow renamed or reordered pages. Hover it for the page-level confidence estimates.
+It follows the review threshold and remains visible even when preview boxes are hidden.
+It means review is needed, not that the API request failed. Flags never change
+the thumbnail's page name. Right-click a flagged thumbnail → **Mark as checked**
+to acknowledge its review flags and clear both badge icons, without adding a Checked badge. **Mark as unchecked**
+restores the flags. This status is saved with your project and follows the page
+when renamed or reordered. Changing its text or receiving a new AI result
+requires review again. Checking a page does not change the model's confidence scores.
+These are model estimates, not measured accuracy. Unlocated passages remain in
+the review list without a guessed rectangle. Editing text keeps the review items and original-image highlights. Scores for edited
+text are marked outdated. Click **×** beside a passage to dismiss only that item and
+its highlight; the other passages stay available. Dismissals are saved in the project.
+A new AI result resets dismissals for that task. Click the arrow beside the confidence totals to collapse or expand the passage list.
+The totals remain visible in the header. Passage links and dismiss buttons are borderless. Collapsing does not dismiss any items. Offline PDF extraction has no AI confidence score.
+
+## Shortcuts
+
+| Action | Shortcut |
+| --- | --- |
+| Add PDF/images | Ctrl+O |
+| New workspace | Ctrl+N |
+| Open project | Ctrl+Shift+O |
+| Save / Save as | Ctrl+S / Ctrl+Shift+S |
+| Export text | Ctrl+E |
+| Previous / next page | Alt+Left / Alt+Right |
+| Go to page | Ctrl+G |
+| Extract | Ctrl+Shift+E |
+| Translate | Ctrl+Enter |
+| Floating Gemini chat | Ctrl+J |
+| Send chat message | Ctrl+Enter (inside chat) |
+| Select image region | Shift-drag in preview |
+| Clear/cancel image region | Esc (inside preview) |
+
+You can also open a document at startup: `py -3 main.py "book.pdf"`.
+
+### Local OCR setup
+
+Install [Tesseract](https://tesseract-ocr.github.io/tessdoc/Installation.html) and the language data you need. It is an optional external program, not a Python package or bundled download. On Windows the normal `C:\Program Files\Tesseract-OCR\tesseract.exe` install is detected automatically, as are executables on PATH. Otherwise use **Settings → Local OCR → Browse** to select it.
+
+Set OCR languages to Tesseract codes such as `eng` (English), `vie` (Vietnamese), `jpn` (Japanese), or `eng+vie`. These describe the source image, independently of the translation target. Install each selected language's `.traineddata` in Tesseract's tessdata folder. Preferences persist with other settings. Local OCR runs entirely on your computer, reports zero API tokens, preserves paragraph/line breaks, and supplies word confidence boxes to the existing review tools. Tesseract confidence is an engine score, not measured accuracy. Blank output or engine errors leave existing text unchanged.
 
 ## Capture pages from a phone
 
@@ -333,46 +404,6 @@ discards edits. Preferences are app-wide, not embedded in individual projects. Y
 keys are saved separately in the OS credential store. Instructions must remain compatible with the required
 text/confidence response format.
 
-## Use the app
-
-1. **Open files**: add PDFs, page images, or a mixture of both to the current workspace. PNG, JPG, WEBP, BMP,
-   TIFF, multi-page TIFF, and password-protected PDFs are supported.
-2. **Extract text**: choose **PDF text · offline** for selectable text, or
-   **AI OCR** for scans and images.
-3. Edit the **Source text**, choose a language, and click **Translate text**.
-   Translation uses the current source text, including your edits.
-4. Navigate with **< / >**, the page label, or the thumbnails. Each page keeps
-   its own source and translation.
-5. **Save project** to continue later. **File → Export text** exports source,
-   translations, or both as a UTF-8 text file. Uncheck **Show page headers** in the
-   export options to omit page headings, then click **Continue** to choose a file.
-
-Drag the preview to pan. Scroll or use +/- to zoom. Double-click or click **Fit**
-to fit the page. The page is horizontally centered when opened, fitted, or when
-the preview panel is resized. Drag the dividers to resize the panels.
-
-The selected model returns confidence estimates for extraction and translation. Amber boxes
-mark uncertain extraction; purple dashed boxes mark uncertain translation.
-Adjust the threshold above the preview or hide boxes with **Flags**. Click a
-review item below the editor to focus its location; hover for its explanation.
-An amber **!** icon on the thumbnail marks low-confidence flags. Hover to see their count.
-Right-click → **Flag page** adds a separate flag icon on a red background for your own reminder;
-**Remove flag** removes just that manual flag. Both icons can appear together.
-Manual flags are saved with the project and follow renamed or reordered pages. Hover it for the page-level confidence estimates.
-It follows the review threshold and remains visible even when preview boxes are hidden.
-It means review is needed, not that the API request failed. Flags never change
-the thumbnail's page name. Right-click a flagged thumbnail → **Mark as checked**
-to acknowledge its review flags and clear both badge icons, without adding a Checked badge. **Mark as unchecked**
-restores the flags. This status is saved with your project and follows the page
-when renamed or reordered. Changing its text or receiving a new AI result
-requires review again. Checking a page does not change the model's confidence scores.
-These are model estimates, not measured accuracy. Unlocated passages remain in
-the review list without a guessed rectangle. Editing text keeps the review items and original-image highlights. Scores for edited
-text are marked outdated. Click **×** beside a passage to dismiss only that item and
-its highlight; the other passages stay available. Dismissals are saved in the project.
-A new AI result resets dismissals for that task. Click the arrow beside the confidence totals to collapse or expand the passage list.
-The totals remain visible in the header. Passage links and dismiss buttons are borderless. Collapsing does not dismiss any items. Offline PDF extraction has no AI confidence score.
-
 ## Saving and requests
 
 Projects store text, assessments, settings, and paths to the original files.
@@ -401,26 +432,6 @@ See [CODE_GUIDE.md](CODE_GUIDE.md) for the file map and request flow.
 
 This version separates the previous large UI module into focused files, replaces
 request dictionaries with a named `PageJob`, and uses a static SVG app icon.
-
-## Shortcuts
-
-| Action | Shortcut |
-| --- | --- |
-| Add PDF/images | Ctrl+O |
-| New workspace | Ctrl+N |
-| Open project | Ctrl+Shift+O |
-| Save / Save as | Ctrl+S / Ctrl+Shift+S |
-| Export text | Ctrl+E |
-| Previous / next page | Alt+Left / Alt+Right |
-| Go to page | Ctrl+G |
-| Extract | Ctrl+Shift+E |
-| Translate | Ctrl+Enter |
-| Floating Gemini chat | Ctrl+J |
-| Send chat message | Ctrl+Enter (inside chat) |
-| Select image region | Shift-drag in preview |
-| Clear/cancel image region | Esc (inside preview) |
-
-You can also open a document at startup: `py -3 main.py "book.pdf"`.
 
 ## Check changes
 
