@@ -19,6 +19,8 @@ class GenerationOptions:
     summary_enabled: bool = True
     fix_previous_page: bool = True
     auto_update_summary: bool = True
+    ocr_executable: str = ""
+    ocr_languages: str = "eng"
 
     def __post_init__(self):
         if type(self.temperature) not in (int, float) or not math.isfinite(self.temperature) or not 0 <= self.temperature <= 2:
@@ -28,7 +30,7 @@ class GenerationOptions:
         for count in (self.pages_before, self.pages_after):
             if type(count) is not int or not 0 <= count <= 10:
                 raise ValueError("Context page counts must be between 0 and 10.")
-        for value in (self.common, self.extraction, self.translation):
+        for value in (self.common, self.extraction, self.translation, self.ocr_executable, self.ocr_languages):
             if not isinstance(value, str):
                 raise ValueError("Instructions must be text.")
 

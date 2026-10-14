@@ -23,6 +23,7 @@ class BatchRun:
     history: list[str] = field(default_factory=list)
     snapshots: list = field(default_factory=list)
     memory_before: str = ""
+    local_ocr: bool = False
 
     @property
     def remaining(self):

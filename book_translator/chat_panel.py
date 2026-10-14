@@ -275,6 +275,8 @@ class ChatPanel(QDialog):
         prompt = self.prompt.toPlainText().strip()
         if self.pending or not prompt:
             return
+        # Re-read the visible selection for every message, even after failover.
+        self.select_model(self.model_selector.currentIndex())
         attachments, names = [], []
         if self.attach_page.isChecked():
             if self.window.book is not self.book:
@@ -314,6 +316,8 @@ class ChatPanel(QDialog):
         def work():
             try:
                 reply = router.call("chat", (context, history, prompt, attachments), options, cancel)
+                active, _ = router.snapshot()
+                object.__setattr__(reply, "model_label", router.profiles[active].label)
                 results.put((token, prompt, reply, None))
             except Exception as exc:
                 results.put((token, prompt, None, redact(str(exc), router.profiles)))
@@ -349,7 +353,7 @@ class ChatPanel(QDialog):
             }])
             self.history = self.history[-12:]
             if reply.answer:
-                self.append_message("AI", reply.answer)
+                self.append_message(getattr(reply, "model_label", "AI"), reply.answer)
             if reply.replacement is not None:
                 self.proposal.setPlainText(reply.replacement or "(Delete selected text)")
                 self.proposal.show()

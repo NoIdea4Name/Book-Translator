@@ -82,6 +82,7 @@ class PageJob:
     page_index: int
     source: str
     target_language: str
+    local: bool = False
 
 
 class MainWindow(BatchControls, QMainWindow):
@@ -1216,7 +1217,7 @@ class MainWindow(BatchControls, QMainWindow):
         if kind != "source" and not target:
             QMessageBox.information(self, tr('Choose a language'), tr('Enter the language to translate into.'))
             return True
-        offline = kind == "source" and self.method.currentIndex() == 0
+        offline = kind == "source" and self.method.currentIndex() in (0, 2)
         if not offline and not self._ensure_key():
             return True
         replace_count = 0
@@ -1238,6 +1239,7 @@ class MainWindow(BatchControls, QMainWindow):
             if answer != QMessageBox.StandardButton.Yes:
                 return True
         self._batch = BatchRun(tuple(indices), kind, target, offline)
+        self._batch.local_ocr = kind == "source" and self.method.currentIndex() == 2
         self.prepare_batch(self._batch)
         self._advance_batch(self._batch)
         return True
@@ -1272,6 +1274,10 @@ class MainWindow(BatchControls, QMainWindow):
             tr('Processing {p0} of {p1} · Page {p2}…', p0=batch.position + 1, p1=len(batch.pages), p2=index + 1)
         )
         try:
+            if batch.local_ocr:
+                operation = self._local_ocr_operation(index)
+                self._start_job('source', operation, page_index=index, local=True)
+                return
             if batch.offline:
                 text = self.book.extract_pdf_text(index)
                 if not text:
@@ -1335,6 +1341,10 @@ class MainWindow(BatchControls, QMainWindow):
         if not self.book or not self.book.pages or self._busy:
             return
         if self._run_selected("source"):
+            return
+        if self.method.currentIndex() == 2:
+            if self._confirm_replace('source'):
+                self._start_job('source', self._local_ocr_operation(self.index), local=True)
             return
         if self.method.currentIndex() == 0:
             try:
@@ -1414,6 +1424,21 @@ class MainWindow(BatchControls, QMainWindow):
         except Exception as exc:
             QMessageBox.warning(self, tr('Extraction and translation failed'), str(exc))
 
+    def _local_ocr_operation(self, index):
+        from .local_ocr import extract_image
+        from .page_render import render_request
+        path, frame = self.book.refs[index]
+        password = self.book._passwords.get(path, '')
+        options = self.generation_options
+        self._request_cancel = threading.Event()
+        cancel, events, token = self._request_cancel, self._api_events, self._job_id + 1
+        def operation():
+            events.put((token, tr('Preparing page image…')))
+            image, _ = render_request(path, frame, password, cancel)
+            events.put((token, tr('Running local OCR…')))
+            return extract_image(image, options.ocr_executable, options.ocr_languages, cancel)
+        return operation
+
     def _page_operation(self, kind, index, source, target):
         from .page_render import render_request
         path, frame = self.book.refs[index]
@@ -1442,11 +1467,11 @@ class MainWindow(BatchControls, QMainWindow):
                 events.put((token, tr('AI request finished in {seconds:.2f}s', seconds=time.perf_counter()-started)))
         return operation
 
-    def _start_job(self, kind, operation, source="", target="", page_index=None):
+    def _start_job(self, kind, operation, source="", target="", page_index=None, local=False):
         self._job_id += 1
         token = self._job_id
         page_index = self.index if page_index is None else page_index
-        self._job = PageJob(token, kind, page_index, source, target)
+        self._job = PageJob(token, kind, page_index, source, target, local)
         results, profiles = self._results, tuple(self._api_profiles())
 
         def work():
@@ -1505,15 +1530,16 @@ class MainWindow(BatchControls, QMainWindow):
             self._drain_api_events()
             job = self._job
             self._job = None
-            self._verified_connection = None
-            if not error:
+            if not job.local:
+                self._verified_connection = None
+            if not error and not job.local:
                 if self._router:
                     active, _ = self._router.snapshot()
                     profile = self._router.profiles[active]
                     self._verified_connection = (profile.api_key, profile.model)
                 else:
                     self._verified_connection = (self.api_key, self.model)
-            if not error:
+            if not error and not job.local:
                 self._model_chosen = True
             self._refresh_controls()
             if self._batch:
@@ -1533,7 +1559,7 @@ class MainWindow(BatchControls, QMainWindow):
             if error:
                 self._update_page_details()
                 self.statusBar().showMessage(tr('Request failed. Your text was left unchanged.'), 7000)
-                QMessageBox.warning(self, tr('API request failed'), error)
+                QMessageBox.warning(self, tr('Local OCR failed') if job.local else tr('API request failed'), error)
                 continue
             self._apply_result(job, result, memory)
 

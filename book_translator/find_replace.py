@@ -130,18 +130,29 @@ class FindReplaceDialog(QDialog):
         close_button.setAutoDefault(False)
         actions.addWidget(close_button)
         layout.addLayout(actions)
-        self.find.textChanged.connect(self.search)
-        self.scope.currentIndexChanged.connect(self.search)
-        self.case_sensitive.toggled.connect(self.search)
-        self.whole_word.toggled.connect(self.search)
+        self.find.textChanged.connect(self.invalidate_search)
+        self.scope.currentIndexChanged.connect(self.invalidate_search)
+        self.case_sensitive.toggled.connect(self.invalidate_search)
+        self.whole_word.toggled.connect(self.invalidate_search)
         self.results.currentRowChanged.connect(self.show_match)
-        self.find.returnPressed.connect(lambda: self.navigate(1))
+        self.find.returnPressed.connect(self.search)
         # Enter in a search field must not trigger a replacement by default.
         for control in (self.previous, self.next, self.undo_button,
                         self.replace_button, self.replace_all_button):
             control.setAutoDefault(False)
-        self.search()
+        self.invalidate_search()
         self.find.setFocus()
+
+    def invalidate_search(self, *_):
+        """Typing never scans the book; stale offsets cannot be replaced."""
+        self.matches = []
+        self.results.clear()
+        self.preview.clear()
+        self.summary.setText(tr("Press Enter to search all pages"))
+        self.status.clear()
+        for control in (self.previous, self.next, self.replace_button, self.replace_all_button):
+            control.setEnabled(False)
+        self.undo_button.setEnabled(bool(self.undo_step))
 
     def search(self, *_):
         pattern = search_pattern(self.find.text(), self.case_sensitive.isChecked(), self.whole_word.isChecked())

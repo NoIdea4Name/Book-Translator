@@ -117,7 +117,7 @@ def _build_toolbar(window):
     row.setSpacing(8)
     row.addWidget(label(tr('Method'), "muted"))
     window.method = QComboBox()
-    window.method.addItems([tr('PDF text · offline'), tr('AI OCR')])
+    window.method.addItems([tr('PDF text · offline'), tr('AI OCR'), tr('Local OCR · Tesseract')])
     window.method.setMinimumWidth(138)
     window.method.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
     window.method.setAccessibleName(tr('Extraction method'))
@@ -233,7 +233,7 @@ def _build_editor(window):
     window.confidence_label.hide()
     window.confidence_label.setContentsMargins(0, 0, 0, 0)
     window.confidence_label.setToolTip(
-        tr('AI confidence scores are self-estimates, not measured accuracy. Local PDF extraction has no AI confidence score.')
+        tr('AI scores are self-estimates; local OCR scores come from Tesseract. Neither measures accuracy. PDF text extraction has no confidence score.')
     )
     review_header.addWidget(window.confidence_label)
     review_header.addStretch()

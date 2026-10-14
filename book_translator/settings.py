@@ -234,6 +234,22 @@ class SettingsDialog(QDialog):
             tr('Uses available page text or embedded PDF text, not neighboring images. Book summary is editable from the Summary button. Context also applies to AI chat.'),
             "muted", True))
         context_layout.addStretch()
+        local_ocr = QWidget()
+        self.tabs.addTab(local_ocr, tr('Local OCR'))
+        ocr_form = QFormLayout(local_ocr)
+        self.ocr_executable = QLineEdit(self.options.ocr_executable)
+        self.ocr_executable.setPlaceholderText(tr('Auto-detect Tesseract'))
+        executable_row = QHBoxLayout()
+        executable_row.addWidget(self.ocr_executable)
+        executable_row.addWidget(button(tr('Browse'), self.browse_ocr))
+        ocr_form.addRow(tr('Tesseract executable'), executable_row)
+        self.ocr_languages = QLineEdit(self.options.ocr_languages)
+        self.ocr_languages.setPlaceholderText('eng+vie')
+        ocr_form.addRow(tr('OCR languages'), self.ocr_languages)
+        ocr_form.addRow(label(tr('Use installed Tesseract language codes, for example eng, vie, jpn, or eng+vie. Local OCR requires Tesseract and its language data. No API key is needed.'), 'muted', True))
+        install_link = QLabel('<a href="https://tesseract-ocr.github.io/tessdoc/Installation.html">' + tr('Install Tesseract') + '</a>')
+        install_link.setOpenExternalLinks(True)
+        ocr_form.addRow(install_link)
         layout = outer
         self.buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
@@ -255,6 +271,12 @@ class SettingsDialog(QDialog):
         self.send_temperature.toggled.connect(self._invalidate_test)
         self.reasoning.currentTextChanged.connect(self._invalidate_test)
         self._set_status((tr('Connection verified · {p0}', p0=model) if self.tested_connection else ""))
+
+    def browse_ocr(self):
+        from PySide6.QtWidgets import QFileDialog
+        path, _ = QFileDialog.getOpenFileName(self, tr("Tesseract executable"), self.ocr_executable.text())
+        if path:
+            self.ocr_executable.setText(path)
 
     def _read_profile(self):
         return ApiProfile(self.provider.currentData(), self.model.currentText(), self.key.text(), self.send_temperature.isChecked(), self.reasoning.currentText())
@@ -448,6 +470,8 @@ class SettingsDialog(QDialog):
             summary_enabled=self.summary_enabled.isChecked(),
             auto_update_summary=self.auto_update_summary.isChecked(),
             fix_previous_page=self.fix_previous_page.isChecked(),
+            ocr_executable=self.ocr_executable.text().strip(),
+            ocr_languages=self.ocr_languages.text().strip() or "eng",
         )
         try:
             warning = save_settings(options, profiles, self.rotation.isChecked(), self.failure_limit.value())
