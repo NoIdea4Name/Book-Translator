@@ -83,3 +83,7 @@ Windows executable itself must be built and tested on Windows.
 
 References: https://pyinstaller.org/en/stable/usage.html and
 https://pyinstaller.org/en/stable/runtime-information.html
+
+### Optional offline OCR
+
+The build includes the Local OCR integration but does not bundle Tesseract or its language data. Install Tesseract separately on the target computer and configure it in Settings → Local OCR. This keeps the executable small and avoids shipping unwanted language packs. No additional Python dependency is needed.
