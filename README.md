@@ -6,7 +6,6 @@ A Python desktop app for extracting and translating books pages. Powered by AI, 
 ## Feautures
 1. Batch processing: Extract or translate multiple book pages with context aware, and automatically summarize to provide context for next pages. Progress window show token usage (None for PDF and Local OCR mode), status, and detailed infomations.
 2. Send from phone: Capture images of book pages and send them to the app directly with full quality, images are editable and can be saved. PDF and images import exist for the local file of computer.
-3. Page review: Automatically flags the low confidence page and passage, individual flagged passage are clickable to focus on the highlighted box on the image and text. Flagged pages and passage can be navigated with keybind.
 3. Page review: Automatically flags the low confidence page and passage, individual flagged passage are clickable to focus on the highlighted box on the image and text, hover for detail. Flagged pages and passage can be navigated with keybind.
 4. AI chat: AI chat window directly inside the app, select text, or image region to ask questions and apply suggested editing in a single button.
 5. API rotation: Rotate through multiple API and providers for almost unlimited usage. Available provider include Google, Nvidia Nim, and Open AI. Google Gemini are recommended since it is fast and have up to 1000 request per day (Multiple model can be used in one API, rotate between models like 3.5 flash lite, and 3.1 flash lite. ). Nvidia are free but slow.
